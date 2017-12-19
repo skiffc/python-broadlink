@@ -25,19 +25,19 @@ def gendevice(devtype, host, mac):
   elif devtype == 0x753e: # SP3
     return sp2(host=host, mac=mac)
   elif devtype == 0x947a or devtype == 0x9479: # SP3S
-    return sp2(host=host, mac=mac)
+    return sp2(host=host, mac=mac, t='SP3S')
   elif devtype == 0x2728: # SPMini2
     return sp2(host=host, mac=mac)
   elif devtype == 0x2733 or devtype == 0x273e: # OEM branded SPMini
-    return sp2(host=host, mac=mac)
+    return sp2(host=host, mac=mac, t='SP3')
   elif devtype >= 0x7530 and devtype <= 0x7918: # OEM branded SPMini2
     return sp2(host=host, mac=mac)
   elif devtype == 0x2736: # SPMiniPlus
     return sp2(host=host, mac=mac)
   elif devtype == 0x2712: # RM2
-    return rm(host=host, mac=mac)
+    return rm(host=host, mac=mac, t='RM Pro')
   elif devtype == 0x2737: # RM Mini
-    return rm(host=host, mac=mac)
+    return rm(host=host, mac=mac, t='RM Mini')
   elif devtype == 0x273d: # RM Pro Phicomm
     return rm(host=host, mac=mac)
   elif devtype == 0x2783: # RM2 Home Plus
@@ -364,9 +364,9 @@ class sp1(device):
 
 
 class sp2(device):
-  def __init__ (self, host, mac):
+  def __init__ (self, host, mac, t='SP2'):
     device.__init__(self, host, mac)
-    self.type = "SP2"
+    self.type = t 
 
   def set_power(self, state):
     """Sets the power state of the smart plug."""
@@ -478,9 +478,9 @@ class a1(device):
 
 
 class rm(device):
-  def __init__ (self, host, mac):
+  def __init__ (self, host, mac, t='RM2'):
     device.__init__(self, host, mac)
-    self.type = "RM2"
+    self.type = t 
 
   def check_data(self):
     packet = bytearray(16)
@@ -490,6 +490,12 @@ class rm(device):
     if err == 0:
       payload = self.decrypt(bytes(response[0x38:]))
       return payload[0x04:]
+
+  def get_hexstr(self):
+    return ''.join("{:02x}".format(ord(c)) for c in self.check_data() ) 
+
+  def send_hexstr(self, hexstr):
+    self.send_data( hexstr.decode('hex')  )
 
   def send_data(self, data):
     packet = bytearray([0x02, 0x00, 0x00, 0x00])

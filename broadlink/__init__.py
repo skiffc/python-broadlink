@@ -495,7 +495,7 @@ class rm(device):
     return ''.join("{:02x}".format(ord(c)) for c in self.check_data() ) 
 
   def send_hexstr(self, hexstr):
-    self.send_data( hexstr.decode('hex')  )
+    self.send_data( bytes.fromhex(hexstr)  )
 
   def send_data(self, data):
     packet = bytearray([0x02, 0x00, 0x00, 0x00])
